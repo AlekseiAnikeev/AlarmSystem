@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace AlarmSystem
 {
+    [RequireComponent(typeof(AudioSource))]
     public class AudioManager : MonoBehaviour
     {
         [SerializeField] private Alarm _alarm;
@@ -15,7 +16,7 @@ namespace AlarmSystem
 
         private void Awake()
         {
-            _audioSource = _alarm.GetComponent<AudioSource>();
+            _audioSource = GetComponent<AudioSource>();
             _audioSource.volume = 0;
         }
 
@@ -37,15 +38,16 @@ namespace AlarmSystem
 
             _audioSource.Play();
 
-            StartCoroutine(nameof(ChangeVolume));
+            _activeCoroutine = StartCoroutine(nameof(ChangeVolume));
         }
 
         private void StopSound()
         {
             _requiredValue = 0f;
 
-            StopCoroutine(nameof(ChangeVolume));
-            StartCoroutine(nameof(ChangeVolume));
+            StopCoroutine(_activeCoroutine);
+            
+            _activeCoroutine = StartCoroutine(nameof(ChangeVolume));
         }
 
         private IEnumerator ChangeVolume()

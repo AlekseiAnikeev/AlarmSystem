@@ -3,19 +3,21 @@ using UnityEngine;
 
 namespace AlarmSystem
 {
-    public class Alarm: MonoBehaviour
+    public class Alarm : MonoBehaviour
     {
-        public event Action MovementEnter;
-        public event Action MovementLeave;
+        public event Action<bool> MovementEnter;
+        public event Action<bool> MovementLeave;
 
         private void OnTriggerEnter(Collider other)
         {
-            MovementEnter?.Invoke();
+            if (other.gameObject.TryGetComponent(out Thief _))
+                MovementEnter?.Invoke(true);
         }
 
         private void OnTriggerExit(Collider other)
         {
-            MovementLeave?.Invoke(); 
+            if (other.gameObject.TryGetComponent(out Thief _))
+                MovementLeave?.Invoke(false);
         }
     }
 }

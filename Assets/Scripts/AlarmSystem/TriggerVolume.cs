@@ -25,29 +25,32 @@ namespace AlarmSystem
         private void OnEnable()
         {
             _alarm.MovementEnter += PlaySound;
-            _alarm.MovementLeave += PlaySound;
+            _alarm.MovementLeave += StopSound;
         }
 
         private void OnDisable()
         {
             _alarm.MovementEnter -= PlaySound;
-            _alarm.MovementLeave -= PlaySound;
+            _alarm.MovementLeave -= StopSound;
         }
 
-        private void PlaySound(bool isEnter)
+        private void PlaySound()
+        {
+            _activeCoroutine = StartCoroutine(ChangeVolume(_maxVolume));
+        }
+
+        private void StopSound()
         {
             if (_activeCoroutine != null)
                 StopCoroutine(_activeCoroutine);
 
-            float targetVolume = isEnter ? _maxVolume : _minVolume;
-
-            _activeCoroutine = StartCoroutine(ChangeVolume(targetVolume));
+            _activeCoroutine = StartCoroutine(ChangeVolume(_minVolume));
         }
 
         private IEnumerator ChangeVolume(float targetVolume)
         {
             float accuracy = 0.00001f;
-            
+
             if (Math.Abs(targetVolume - _maxVolume) < accuracy)
                 _audioSource.Play();
 
@@ -56,11 +59,11 @@ namespace AlarmSystem
                 _audioSource.volume =
                     Mathf.MoveTowards(_audioSource.volume, targetVolume, _fillingRate * Time.deltaTime);
 
-                if (Math.Abs(_audioSource.volume - _minVolume) < accuracy)
-                    _audioSource.Stop();
-
                 yield return null;
             }
+            
+            if (Math.Abs(_audioSource.volume - _minVolume) < accuracy)
+                _audioSource.Stop();
         }
     }
 }
